@@ -58,6 +58,8 @@ console.log("WebSocket server running on ws://localhost:8080");
 
 const WHITE = "white";
 const BLACK = "black";
+const ROWS = 6
+const COLLUMNS = 5
 
 const directions = {
   pawn: [
@@ -211,7 +213,7 @@ function validatePieceMove(
 function findKingPosition(board, color) {
   const kingSymbol = color === WHITE ? "K" : "k";
   for (let i = 0; i < ROWS; i++) {
-    for (let j = 0; j < COLLUMS; j++) {
+    for (let j = 0; j < COLLUMNS; j++) {
       if (board[i][j] === kingSymbol) {
         return [i, j];
       }
@@ -225,7 +227,7 @@ function isPositionUnderAttack(board, position, color) {
   const opponentColor = color === WHITE ? BLACK : WHITE;
 
   for (let i = 0; i < ROWS; i++) {
-    for (let j = 0; j < COLLUMS; j++) {
+    for (let j = 0; j < COLLUMNS; j++) {
       const piece = board[i][j];
       if (piece && getPieceColor(piece) === opponentColor) {
         if (isValidMove(board, [i, j], position, opponentColor)) {
@@ -272,4 +274,82 @@ function isOpponentKingInCheckAfterMove(board, from, to, color, lastMove) {
   board[to[0]][to[1]] = originalPieceAtDestination;
 
   return isInCheck;
+}
+
+function getPossibleMoves(board, from, color, lastMove) {
+  const [x, y] = from;
+  const possibleMoves = [];
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLLUMNS; j++) {
+      const to = [i, j];
+      if (isValidMoveWithKingSafety(board, from, to, color, lastMove)) {
+        possibleMoves.push(to);
+      }
+    }
+  }
+  return possibleMoves;
+}
+
+function isCheckmate(board, color, lastMove) {
+  const kingPosition = findKingPosition(board, color);
+  const isKingInCheck = isPositionUnderAttack(board, kingPosition, color === WHITE ? BLACK : WHITE);
+
+  if (!isKingInCheck) {
+    return false;
+  }
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLLUMNS; j++) {
+      const piece = board[i][j];
+      if (piece && getPieceColor(piece) === color) {
+        const possibleMoves = getPossibleMoves(board, [i, j], color, lastMove);
+
+        for (const move of possibleMoves) {
+          const [toX, toY] = move;
+
+          const originalPieceAtDestination = board[toX][toY];
+          board[i][j] = ""; 
+          board[toX][toY] = piece; 
+
+          const kingPositionAfterMove = piece.toLowerCase() === "k" ? move : kingPosition;
+          const kingSafeAfterMove = !isPositionUnderAttack(board, kingPositionAfterMove, color === WHITE ? BLACK : WHITE);
+
+          board[i][j] = piece;
+          board[toX][toY] = originalPieceAtDestination;
+
+          if (kingSafeAfterMove) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+function isStalemate(board, color, lastMove) {
+  const kingPosition = findKingPosition(board, color);
+
+  const isKingInCheck = isPositionUnderAttack(board, kingPosition, color === WHITE ? BLACK : WHITE);
+
+  if (isKingInCheck) {
+    return false;
+  }
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLLUMNS; j++) {
+      const piece = board[i][j];
+      if (piece && getPieceColor(piece) === color) {
+        const possibleMoves = getPossibleMoves(board, [i, j], piece, color, lastMove);
+
+        if (possibleMoves.length > 0) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
