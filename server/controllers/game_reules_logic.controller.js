@@ -256,3 +256,20 @@ function isValidMoveWithKingSafety(board, from, to, color, lastMove) {
 
   return isKingSafe && isValidMove(board, from, to, color, lastMove);
 }
+
+function isOpponentKingInCheckAfterMove(board, from, to, color, lastMove) {
+  const opponentColor = color === WHITE ? BLACK : WHITE;
+
+  const piece = board[from[0]][from[1]];
+  const originalPieceAtDestination = board[to[0]][to[1]];
+  board[from[0]][from[1]] = "";
+  board[to[0]][to[1]] = piece;
+
+  const opponentKingPosition = findKingPosition(board, opponentColor);
+  const isInCheck = isPositionUnderAttack(board, opponentKingPosition, color);
+
+  board[from[0]][from[1]] = piece;
+  board[to[0]][to[1]] = originalPieceAtDestination;
+
+  return isInCheck;
+}
