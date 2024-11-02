@@ -116,18 +116,18 @@ function getPieceColor(piece) {
   return piece === piece.toUpperCase() ? WHITE : BLACK;
 }
 
-function isValidMove(board, from, to, color) {
+function isValidMove(board, from, to, color, lastMove) {
   const [x1, y1] = from;
   const [x2, y2] = to;
   const piece = board[x1][y1];
 
   if (!board[x1][y1] || getPieceColor(board[x1][y1]) != color) return false;
-  if (!isInBounds(x2, y2)) return false; 
+  if (!isInBounds(x2, y2)) return false;
   if (getPieceColor(board[x2][y2]) === color) return false;
 
   switch (piece.toLowerCase()) {
     case "p": // Pawn
-      return validatePawnMove(from, to, color, board);
+      return validatePawnMove(from, to, color, board, lastMove);
     case "n": // Knight
       return validatePieceMove(from, to, directions.knight, true);
     case "b": // Bishop
@@ -143,7 +143,7 @@ function isValidMove(board, from, to, color) {
   }
 }
 
-function validatePawnMove([x1, y1], [x2, y2], color, board) {
+function validatePawnMove([x1, y1], [x2, y2], color, board, lastMove) {
   const direction = color === WHITE ? 1 : -1;
   if (y1 === y2 && x2 - x1 === direction && !board[x2][y2]) return true;
   if (
@@ -152,14 +152,35 @@ function validatePawnMove([x1, y1], [x2, y2], color, board) {
     x1 === (color === WHITE ? 4 : 1) &&
     !board[x2][y2]
   )
-    return true; 
+    return true;
   if (
     Math.abs(y2 - y1) === 1 &&
     x2 - x1 === direction &&
     board[x2][y2] &&
     getPieceColor(board[x2][y2]) !== color
   )
-    return true; 
+    return true;
+
+  // En passant
+  if (lastMove) {
+    const [lastFrom, lastTo] = lastMove;
+    const lastPiece = board[lastTo[0]][lastTo[1]];
+
+    if (
+      Math.abs(lastFrom[0] - lastTo[0]) === 2 &&
+      lastPiece.toLowerCase() === "p"
+    ) {
+      if (
+        y2 === lastTo[1] && 
+        x2 - x1 === direction && 
+        x2 === lastFrom[0] + direction && 
+        y2 === lastTo[1]
+      ) {
+        return true; 
+      }
+    }
+  }
+
   return false;
 }
 
@@ -179,9 +200,9 @@ function validatePieceMove(
     while (true) {
       stepX += mx;
       stepY += my;
-      if (stepX === x2 && stepY === y2) return true; 
+      if (stepX === x2 && stepY === y2) return true;
       if (!isInBounds(stepX, stepY) || board[stepX][stepY]) break;
-      if (singleStep) break; 
+      if (singleStep) break;
     }
   }
   return false;
