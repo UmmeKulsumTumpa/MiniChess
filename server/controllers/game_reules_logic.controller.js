@@ -207,3 +207,52 @@ function validatePieceMove(
   }
   return false;
 }
+
+function findKingPosition(board, color) {
+  const kingSymbol = color === WHITE ? "K" : "k";
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLLUMS; j++) {
+      if (board[i][j] === kingSymbol) {
+        return [i, j];
+      }
+    }
+  }
+  return null;
+}
+
+function isPositionUnderAttack(board, position, color) {
+  const [x, y] = position;
+  const opponentColor = color === WHITE ? BLACK : WHITE;
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLLUMS; j++) {
+      const piece = board[i][j];
+      if (piece && getPieceColor(piece) === opponentColor) {
+        if (isValidMove(board, [i, j], position, opponentColor)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function isValidMoveWithKingSafety(board, from, to, color, lastMove) {
+  const [x1, y1] = from;
+  const [x2, y2] = to;
+  const piece = board[x1][y1];
+
+  const originalPieceAtDestination = board[x2][y2];
+  board[x1][y1] = "";
+  board[x2][y2] = piece;
+
+  const kingPosition =
+    piece.toLowerCase() === "k" ? to : findKingPosition(board, color);
+
+  const isKingSafe = !isPositionUnderAttack(board, kingPosition, color);
+
+  board[x1][y1] = piece;
+  board[x2][y2] = originalPieceAtDestination;
+
+  return isKingSafe && isValidMove(board, from, to, color, lastMove);
+}
