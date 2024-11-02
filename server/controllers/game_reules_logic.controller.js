@@ -1,3 +1,4 @@
+const { func } = require("prop-types");
 const WebSocket = require("ws");
 
 const wss = new WebSocket.Server({ port: 8080 });
@@ -352,4 +353,15 @@ function isStalemate(board, color, lastMove) {
   }
 
   return true;
+}
+
+function performMove(from, to, board) {
+  if(!isValidMoveWithKingSafety()) return [false, board];
+
+  const [x1, y1] = from;
+  const [x2, y2] = to;
+  const piece = board[x1][y1];
+
+  board[x1][y1] = "";
+  board[x2][y2] = piece;
 }
