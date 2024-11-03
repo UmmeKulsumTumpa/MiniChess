@@ -97,7 +97,7 @@ class GameRules {
   validatePawnMove(from, to, color, board, lastMove) {
     const [x1, y1] = from;
     const [x2, y2] = to;
-    const direction = color === this.WHITE ? 1 : -1;
+    const direction = color === this.WHITE ? -1 : 1;
 
     // Move forward
     if (y1 === y2 && x2 - x1 === direction && !board[x2][y2]) return true;
