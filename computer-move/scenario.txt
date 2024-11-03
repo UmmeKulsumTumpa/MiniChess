@@ -1,0 +1,86 @@
+// MinitChess 5x6 Board Setup 
+const board = [
+    // Row 0 - Black's back rank
+    [
+        { color: 'black', type: 'rook' },
+        { color: 'black', type: 'knight' },
+        { color: 'black', type: 'bishop' },
+        { color: 'black', type: 'queen' },
+        { color: 'black', type: 'king' }
+    ],
+    // Row 1 - Black's pawns
+    [
+        { color: 'black', type: 'pawn' },
+        { color: 'black', type: 'pawn' },
+        { color: 'black', type: 'pawn' },
+        { color: 'black', type: 'pawn' },
+        { color: 'black', type: 'pawn' }
+    ],
+    // Rows 2 and 3 - Empty rows
+    [null, null, null, null, null],
+    [null, null, null, null, null],
+    // Row 4 - White's pawns
+    [
+        { color: 'white', type: 'pawn' },
+        { color: 'white', type: 'pawn' },
+        { color: 'white', type: 'pawn' },
+        { color: 'white', type: 'pawn' },
+        { color: 'white', type: 'pawn' }
+    ],
+    // Row 5 - White's back rank
+    [
+        { color: 'white', type: 'rook' },
+        { color: 'white', type: 'knight' },
+        { color: 'white', type: 'bishop' },
+        { color: 'white', type: 'queen' },
+        { color: 'white', type: 'king' }
+    ]
+];
+
+const color = 'black';
+
+playMove(board, color);
+
+
+-----------------------------------------
+
+// MinitChess 5x6 Board Setup for Pawn Promotion Scenario
+const board = [
+    // Row 0
+    [null, { color: 'white', type: 'pawn' }, null, null, { color: 'black', type: 'king' }],
+    // Row 1
+    [null, null, null, null, null],
+    // Row 2
+    [null, null, null, null, null],
+    // Row 3
+    [null, null, null, null, null],
+    // Row 4
+    [null, null, null, null, null],
+    // Row 5
+    [{ color: 'white', type: 'king' }, null, null, null, null]
+];
+
+const color = 'white';
+
+playMove(board, color);
+
+---------------------------------
+// MinitChess 5x6 Threat Avoidance Scenario
+const board = [
+    // Row 0
+    [null, null, null, { color: 'black', type: 'queen' }, { color: 'black', type: 'king' }],
+    // Row 1
+    [null, null, null, null, null],
+    // Row 2
+    [null, null, { color: 'white', type: 'rook' }, null, null],
+    // Row 3
+    [null, null, null, null, null],
+    // Row 4
+    [null, null, null, null, null],
+    // Row 5
+    [{ color: 'white', type: 'king' }, null, null, null, null]
+];
+
+const color = 'white';
+
+playMove(board, color);
