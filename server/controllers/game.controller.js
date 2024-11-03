@@ -59,7 +59,7 @@ wss.on("connection", (ws) => {
 console.log("WebSocket server running on ws://localhost:8080");
 
 function performMove(from, to, board) {
-  if (!isValidMoveWithKingSafety()) return [false, board];
+  if (!gameRules.isValidMoveWithKingSafety()) return [false, board];
 
   const [x1, y1] = from;
   const [x2, y2] = to;
@@ -67,4 +67,6 @@ function performMove(from, to, board) {
 
   board[x1][y1] = "";
   board[x2][y2] = piece;
+
+  return [true, board]
 }
