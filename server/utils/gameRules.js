@@ -331,6 +331,20 @@ class GameRules {
 
     return true;
   }
+
+  isPawnPromotable(position, color) {
+    const [x, y] = position;
+
+    if (color === this.WHITE && x === 0) {
+      return true;
+    }
+
+    if (color === this.BLACK && x === this.ROWS - 1) {
+      return true;
+    }
+
+    return false;
+  }
 }
 
 module.exports = new GameRules();
