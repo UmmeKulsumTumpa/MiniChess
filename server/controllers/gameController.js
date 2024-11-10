@@ -13,9 +13,10 @@ class Move {
     this.endCol = endCol;
     this.pieceMoved = pieceMoved;
     this.pieceCaptured = pieceCaptured;
-    this.isPawnPromotion = (this.pieceMoved === 'w_P' && this.endRow === 0) ||
-                            (this.pieceMoved === 'b_P' && this.endRow === 5);
-    this.moveID = this.startRow * 1000 + this.startCol * 100 + this.endRow * 10 + this.endCol;
+    this.isPawnPromotion =
+      (pieceMoved === 'P' && endRow === 0) ||
+      (pieceMoved === 'p' && endRow === 5);
+    this.moveID = startRow * 1000 + startCol * 100 + endRow * 10 + endCol;
   }
 
   equals(other) {
@@ -40,12 +41,12 @@ class GameStateClass {
       this.board = board;
     } else {
       this.board = [
-        ['b_R', 'b_N', 'b_B', 'b_Q', 'b_K'],
-        ['b_P', 'b_P', 'b_P', 'b_P', 'b_P'],
-        ['--', '--', '--', '--', '--'],
-        ['--', '--', '--', '--', '--'],
-        ['w_P', 'w_P', 'w_P', 'w_P', 'w_P'],
-        ['w_K', 'w_Q', 'w_B', 'w_N', 'w_R'],
+        ['r', 'n', 'b', 'q', 'k'],
+        ['p', 'p', 'p', 'p', 'p'],
+        [' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' '],
+        ['P', 'P', 'P', 'P', 'P'],
+        ['R', 'N', 'B', 'Q', 'K'],
       ];
     }
 
@@ -58,21 +59,21 @@ class GameStateClass {
   }
 
   makeMove(move) {
-    this.board[move.startRow][move.startCol] = '--';
+    this.board[move.startRow][move.startCol] = ' ';
     this.board[move.endRow][move.endCol] = move.pieceMoved;
     this.moveLog.push(move);
     this.whiteToMove = !this.whiteToMove;
 
     // Update king location if moved
-    if (move.pieceMoved === 'w_K') {
+    if (move.pieceMoved === 'K') {
       this.whiteKingLocation = [move.endRow, move.endCol];
-    } else if (move.pieceMoved === 'b_K') {
+    } else if (move.pieceMoved === 'k') {
       this.blackKingLocation = [move.endRow, move.endCol];
     }
 
     // Pawn promotion
     if (move.isPawnPromotion) {
-      const promotedPiece = move.pieceMoved[0] + '_Q'; // Auto promote to Queen
+      const promotedPiece = move.pieceMoved === 'P' ? 'Q' : 'q'; // Promote to Queen
       this.board[move.endRow][move.endCol] = promotedPiece;
     }
 
@@ -90,9 +91,9 @@ class GameStateClass {
     this.whiteToMove = !this.whiteToMove;
 
     // Update king location if moved
-    if (move.pieceMoved === 'w_K') {
+    if (move.pieceMoved === 'K') {
       this.whiteKingLocation = [move.startRow, move.startCol];
-    } else if (move.pieceMoved === 'b_K') {
+    } else if (move.pieceMoved === 'k') {
       this.blackKingLocation = [move.startRow, move.startCol];
     }
 
@@ -106,8 +107,8 @@ class GameStateClass {
     for (let r = 0; r < this.board.length; r++) {
       for (let c = 0; c < this.board[r].length; c++) {
         const piece = this.board[r][c];
-        if (piece === '--') continue;
-        const color = piece[0] === 'w' ? 'white' : 'black';
+        if (piece === ' ') continue;
+        const color = piece === piece.toUpperCase() ? 'white' : 'black';
         if ((color === 'white' && this.whiteToMove) || (color === 'black' && !this.whiteToMove)) {
           // Generate all possible moves for this piece
           const possibleDestinations = gameRules.getPossibleMoves(this.board, [r, c], color, this.getLastMove());
@@ -126,7 +127,7 @@ class GameStateClass {
     const finalValidMoves = [];
     for (let move of validMoves) {
       this.makeMove(move);
-      const color = move.pieceMoved[0] === 'w' ? 'white' : 'black';
+      const color = move.pieceMoved === move.pieceMoved.toUpperCase() ? 'white' : 'black';
       const isInCheck = this.isInCheck(color);
       this.undoMove();
       if (!isInCheck) {
@@ -207,11 +208,11 @@ exports.makeMove = (req, res) => {
   const pieceMoved = gameState.board[startRow][startCol];
   const pieceCaptured = gameState.board[endRow][endCol];
 
-  if (!pieceMoved) {
+  if (pieceMoved === ' ') {
     return res.status(400).json({ error: 'No piece at starting square.' });
   }
 
-  const color = pieceMoved[0] === 'w' ? 'white' : 'black';
+  const color = pieceMoved === pieceMoved.toUpperCase() ? 'white' : 'black';
   if ((color === 'white' && !gameState.whiteToMove) || (color === 'black' && gameState.whiteToMove)) {
     return res.status(400).json({ error: 'Not your turn.' });
   }
@@ -233,9 +234,8 @@ exports.makeMove = (req, res) => {
   if (moveMade) {
     gameState.makeMove(moveMade);
 
-    // Check for checkmate or stalemate
-    const validMovesAfterMove = gameState.getValidMoves();
-    // If checkMate or staleMate is set in getValidMoves
+    // After making the move, check for checkmate or stalemate
+    gameState.getValidMoves();
 
     res.json({ gameState: serializeGameState(gameState) });
   } else {
@@ -263,6 +263,8 @@ exports.getAIMove = (req, res) => {
   const aiMove = getAIMove(gameState, 4);
   if (aiMove) {
     gameState.makeMove(aiMove);
+    // After AI move, check for checkmate or stalemate
+    gameState.getValidMoves();
     res.json({ bestMove: serializeMove(aiMove), gameState: serializeGameState(gameState) });
   } else {
     res.json({ message: 'No valid moves available.' });

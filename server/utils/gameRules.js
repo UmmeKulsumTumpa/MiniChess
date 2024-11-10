@@ -1,4 +1,5 @@
 // utils/game_rules.js
+
 const WHITE = "white";
 const BLACK = "black";
 
@@ -64,6 +65,7 @@ class GameRules {
   }
 
   getPieceColor(piece) {
+    if (piece === ' ') return null; // Empty square
     return piece === piece.toUpperCase() ? this.WHITE : this.BLACK;
   }
 
@@ -74,7 +76,7 @@ class GameRules {
 
     if (!piece || this.getPieceColor(piece) !== color) return false;
     if (!this.isInBounds(x2, y2)) return false;
-    if (board[x2][y2] && this.getPieceColor(board[x2][y2]) === color) return false;
+    if (board[x2][y2] !== ' ' && this.getPieceColor(board[x2][y2]) === color) return false;
 
     switch (piece.toLowerCase()) {
       case "p": // Pawn
@@ -99,44 +101,38 @@ class GameRules {
     const [x2, y2] = to;
     const direction = color === this.WHITE ? -1 : 1;
 
-    // Move forward
-    if (y1 === y2 && x2 - x1 === direction && !board[x2][y2]) return true;
-    // Move two squares from starting position
-    // if (
-    //   y1 === y2 &&
-    //   x2 - x1 === 2 * direction &&
-    //   x1 === (color === this.WHITE ? 4 : 1) &&
-    //   !board[x2][y2] &&
-    //   !board[x1 + direction][y1]
-    // )
-    //   return true;
+    // Move forward one square
+    if (y1 === y2 && x2 - x1 === direction && board[x2][y2] === ' ') return true;
+
     // Capture diagonally
     if (
       Math.abs(y2 - y1) === 1 &&
       x2 - x1 === direction &&
-      board[x2][y2] &&
+      board[x2][y2] !== ' ' &&
       this.getPieceColor(board[x2][y2]) !== color
     )
       return true;
 
-    // En passant
-    // if (lastMove) {
-    //   const [lastFrom, lastTo] = lastMove;
-    //   const lastPiece = board[lastTo[0]][lastTo[1]];
+    // En passant (Optional: Uncomment if implementing)
+    /*
+    if (lastMove) {
+      const [lastFrom, lastTo] = lastMove;
+      const lastPiece = board[lastTo[0]][lastTo[1]];
 
-    //   if (
-    //     Math.abs(lastFrom[0] - lastTo[0]) === 2 &&
-    //     lastPiece.toLowerCase() === "p"
-    //   ) {
-    //     if (
-    //       y2 === lastTo[1] &&
-    //       x2 - x1 === direction &&
-    //       x1 === lastTo[0] + direction
-    //     ) {
-    //       return true;
-    //     }
-    //   }
-    // }
+      if (
+        Math.abs(lastFrom[0] - lastTo[0]) === 2 &&
+        lastPiece.toLowerCase() === "p"
+      ) {
+        if (
+          y2 === lastTo[1] &&
+          x2 - x1 === direction &&
+          x1 === lastTo[0] + direction
+        ) {
+          return true;
+        }
+      }
+    }
+    */
 
     return false;
   }
@@ -144,8 +140,6 @@ class GameRules {
   validatePieceMove(from, to, moveDirections, singleStep, board) {
     const [x1, y1] = from;
     const [x2, y2] = to;
-    const dx = x2 - x1;
-    const dy = y2 - y1;
 
     for (const [mx, my] of moveDirections) {
       let stepX = x1;
@@ -156,7 +150,8 @@ class GameRules {
         stepY += my;
 
         if (stepX === x2 && stepY === y2) return true;
-        if (!this.isInBounds(stepX, stepY) || board[stepX][stepY]) break;
+        if (!this.isInBounds(stepX, stepY)) break;
+        if (board[stepX][stepY] !== ' ') break;
         if (singleStep) break;
       }
     }
@@ -182,7 +177,7 @@ class GameRules {
     for (let i = 0; i < this.ROWS; i++) {
       for (let j = 0; j < this.COLUMNS; j++) {
         const piece = board[i][j];
-        if (piece && this.getPieceColor(piece) === opponentColor) {
+        if (piece !== ' ' && this.getPieceColor(piece) === opponentColor) {
           if (this.isValidMove(board, [i, j], position, opponentColor)) {
             return true;
           }
@@ -198,7 +193,7 @@ class GameRules {
     const piece = board[x1][y1];
 
     const originalPieceAtDestination = board[x2][y2];
-    board[x1][y1] = "";
+    board[x1][y1] = ' ';
     board[x2][y2] = piece;
 
     let kingPosition;
@@ -224,7 +219,7 @@ class GameRules {
     const [x2, y2] = to;
     const piece = board[x1][y1];
     const originalPieceAtDestination = board[x2][y2];
-    board[x1][y1] = "";
+    board[x1][y1] = ' ';
     board[x2][y2] = piece;
 
     const opponentKingPosition = this.findKingPosition(board, opponentColor);
@@ -257,7 +252,7 @@ class GameRules {
   isCheckmate(board, color, lastMove) {
     const kingPosition = this.findKingPosition(board, color);
     const isKingInCheck = kingPosition
-      ? this.isPositionUnderAttack(board, kingPosition, color === this.WHITE ? this.BLACK : this.WHITE)
+      ? this.isPositionUnderAttack(board, kingPosition, this.getPieceColor(board[kingPosition[0]][kingPosition[1]]))
       : false;
 
     if (!isKingInCheck) {
@@ -267,14 +262,14 @@ class GameRules {
     for (let i = 0; i < this.ROWS; i++) {
       for (let j = 0; j < this.COLUMNS; j++) {
         const piece = board[i][j];
-        if (piece && this.getPieceColor(piece) === color) {
+        if (piece !== ' ' && this.getPieceColor(piece) === color) {
           const possibleMoves = this.getPossibleMoves(board, [i, j], color, lastMove);
 
           for (const move of possibleMoves) {
             const [toX, toY] = move;
 
             const originalPieceAtDestination = board[toX][toY];
-            board[i][j] = "";
+            board[i][j] = ' ';
             board[toX][toY] = piece;
 
             const kingPositionAfterMove =
@@ -283,7 +278,7 @@ class GameRules {
               !this.isPositionUnderAttack(
                 board,
                 kingPositionAfterMove,
-                color === this.WHITE ? this.BLACK : this.WHITE
+                this.getPieceColor(board[kingPositionAfterMove[0]][kingPositionAfterMove[1]])
               );
 
             // Undo the move
@@ -308,7 +303,7 @@ class GameRules {
       ? this.isPositionUnderAttack(
           board,
           kingPosition,
-          color === this.WHITE ? this.BLACK : this.WHITE
+          this.getPieceColor(board[kingPosition[0]][kingPosition[1]])
         )
       : false;
 
@@ -319,7 +314,7 @@ class GameRules {
     for (let i = 0; i < this.ROWS; i++) {
       for (let j = 0; j < this.COLUMNS; j++) {
         const piece = board[i][j];
-        if (piece && this.getPieceColor(piece) === color) {
+        if (piece !== ' ' && this.getPieceColor(piece) === color) {
           const possibleMoves = this.getPossibleMoves(board, [i, j], color, lastMove);
 
           if (possibleMoves.length > 0) {
