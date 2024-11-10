@@ -102,14 +102,14 @@ class GameRules {
     // Move forward
     if (y1 === y2 && x2 - x1 === direction && !board[x2][y2]) return true;
     // Move two squares from starting position
-    if (
-      y1 === y2 &&
-      x2 - x1 === 2 * direction &&
-      x1 === (color === this.WHITE ? 4 : 1) &&
-      !board[x2][y2] &&
-      !board[x1 + direction][y1]
-    )
-      return true;
+    // if (
+    //   y1 === y2 &&
+    //   x2 - x1 === 2 * direction &&
+    //   x1 === (color === this.WHITE ? 4 : 1) &&
+    //   !board[x2][y2] &&
+    //   !board[x1 + direction][y1]
+    // )
+    //   return true;
     // Capture diagonally
     if (
       Math.abs(y2 - y1) === 1 &&
@@ -120,23 +120,23 @@ class GameRules {
       return true;
 
     // En passant
-    if (lastMove) {
-      const [lastFrom, lastTo] = lastMove;
-      const lastPiece = board[lastTo[0]][lastTo[1]];
+    // if (lastMove) {
+    //   const [lastFrom, lastTo] = lastMove;
+    //   const lastPiece = board[lastTo[0]][lastTo[1]];
 
-      if (
-        Math.abs(lastFrom[0] - lastTo[0]) === 2 &&
-        lastPiece.toLowerCase() === "p"
-      ) {
-        if (
-          y2 === lastTo[1] &&
-          x2 - x1 === direction &&
-          x1 === lastTo[0] + direction
-        ) {
-          return true;
-        }
-      }
-    }
+    //   if (
+    //     Math.abs(lastFrom[0] - lastTo[0]) === 2 &&
+    //     lastPiece.toLowerCase() === "p"
+    //   ) {
+    //     if (
+    //       y2 === lastTo[1] &&
+    //       x2 - x1 === direction &&
+    //       x1 === lastTo[0] + direction
+    //     ) {
+    //       return true;
+    //     }
+    //   }
+    // }
 
     return false;
   }
@@ -330,6 +330,20 @@ class GameRules {
     }
 
     return true;
+  }
+
+  isPawnPromotable(position, color) {
+    const [x, y] = position;
+
+    if (color === this.WHITE && x === 0) {
+      return true;
+    }
+
+    if (color === this.BLACK && x === this.ROWS - 1) {
+      return true;
+    }
+
+    return false;
   }
 }
 
