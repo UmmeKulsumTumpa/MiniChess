@@ -183,7 +183,7 @@ function findBestMove(gameState, depth) {
 }
 
 // AI Move based on minimax
-function getAIMove(gameState, depth = 4) {
+function getAIMove(gameState, depth = 10) {
   return findBestMove(gameState, depth);
 }
 

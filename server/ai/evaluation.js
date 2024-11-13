@@ -1,5 +1,7 @@
 // server/ai/evaluation.js
 
+const GameRules = require('../utils/gameRules')
+
 // Basic piece values
 const pieceValue = { K: 0, Q: 10, R: 4, B: 4, N: 7, P: 1 };
 
@@ -95,6 +97,11 @@ function countPieceMobility(board, row, col) {
 // Main function to evaluate the board
 function scoreBoard(board, isWhiteTurn) {
   let score = 0;
+
+  const currentColor = isWhiteTurn? 'w' : 'b';
+  if(GameRules.isCheckmate(board, currentColor, null)) {
+    return isWhiteTurn? Infinity : -Infinity;
+  }
 
   for (let row = 0; row < board.length; row++) {
     for (let col = 0; col < board[row].length; col++) {
