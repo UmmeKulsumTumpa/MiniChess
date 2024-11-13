@@ -60,20 +60,29 @@ function App() {
     <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center p-4">
       <h1 className="text-4xl font-bold mb-8">Mini Chess</h1>
       {gameState ? (
-        <div className="w-full max-w-4xl">
-          <div className="flex justify-between mb-4">
-            <CapturedPieces player="black" moveLog={gameState.moveLog} />
+        <div className="w-full max-w-6xl">
+          {/* ScoreBoard at the top centered */}
+          <div className="flex justify-center mb-4">
             <ScoreBoard moveLog={gameState.moveLog} />
           </div>
-          <div className="flex justify-center mb-4">
-            <ChessBoard
-              gameState={gameState}
-              onUpdateGameState={handleGameStateUpdate}
-              onError={setError}
-            />
-          </div>
-          <div className="flex justify-end">
-            <CapturedPieces player="white" moveLog={gameState.moveLog} />
+          {/* Game board area */}
+          <div className="flex">
+            {/* Black's captured pieces on the left */}
+            <div className="flex-1 flex justify-center">
+              <CapturedPieces player="black" moveLog={gameState.moveLog} />
+            </div>
+            {/* ChessBoard in the center */}
+            <div className="flex-1 flex justify-center">
+              <ChessBoard
+                gameState={gameState}
+                onUpdateGameState={handleGameStateUpdate}
+                onError={setError}
+              />
+            </div>
+            {/* White's captured pieces on the right */}
+            <div className="flex-1 flex justify-center">
+              <CapturedPieces player="white" moveLog={gameState.moveLog} />
+            </div>
           </div>
         </div>
       ) : (

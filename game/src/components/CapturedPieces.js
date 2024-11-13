@@ -9,11 +9,11 @@ function CapturedPieces({ player, moveLog }) {
   moveLog.forEach((move) => {
     if (move.pieceCaptured && move.pieceCaptured !== ' ') {
       const capturedPiece = move.pieceCaptured;
-      const capturedByOpponent = player === 'white'
-        ? move.pieceMoved === move.pieceMoved.toLowerCase()
-        : move.pieceMoved === move.pieceMoved.toUpperCase();
+      const capturedByPlayer =
+        (player === 'white' && move.pieceMoved === move.pieceMoved.toUpperCase()) ||
+        (player === 'black' && move.pieceMoved === move.pieceMoved.toLowerCase());
 
-      if (capturedByOpponent) {
+      if (capturedByPlayer) {
         capturedPieces.push(capturedPiece);
       }
     }
