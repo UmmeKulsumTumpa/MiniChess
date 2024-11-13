@@ -38,11 +38,30 @@ function ChessBoard({ gameState, onUpdateGameState, onError }) {
         onUpdateGameState(response.gameState);
         setSelectedSquare(null);
 
+        // After player's move, check if game is over
+        if (response.gameState.checkMate || response.gameState.staleMate) {
+          return;
+        }
+
         // After player's move, request AI move
         setIsWaitingForAI(true);
-        const aiResponse = await getAIMove(response.gameState);
-        onUpdateGameState(aiResponse.gameState);
-        setIsWaitingForAI(false);
+        try {
+          const aiResponse = await getAIMove(response.gameState);
+          onUpdateGameState(aiResponse.gameState);
+          setIsWaitingForAI(false);
+
+          // After AI's move, check if game is over
+          if (aiResponse.gameState.checkMate || aiResponse.gameState.staleMate) {
+            return;
+          }
+        } catch (aiError) {
+          const aiErrorMessage =
+            (aiError.response && aiError.response.data.error) ||
+            'An error occurred during AI move.';
+          onError(aiErrorMessage);
+          setIsWaitingForAI(false);
+        }
+
       } catch (error) {
         const errorMessage =
           (error.response && error.response.data.error) ||
@@ -56,9 +75,7 @@ function ChessBoard({ gameState, onUpdateGameState, onError }) {
   return (
     <div
       className="grid grid-cols-5 grid-rows-6 border-4 border-gray-700"
-      style={{ width: '500px',
-        height: '600px',
-       }}
+      style={{ width: '500px', height: '600px' }}
     >
       {board.map((row, rowIndex) =>
         row.map((square, colIndex) => (
