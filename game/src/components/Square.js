@@ -4,17 +4,20 @@ import React from 'react';
 import Piece from './Piece';
 
 function Square({ piece, row, col, isSelected, onClick }) {
-  const isDark = (row + col) % 2 === 1;
-  const baseColor = isDark ? 'bg-gray-600' : 'bg-gray-200';
-  const selectedStyle = isSelected ? 'ring-4 ring-yellow-400' : '';
-  const hoverStyle = 'hover:ring-2 hover:ring-yellow-300';
+  // Determine if the square should be light or dark
+  const isLightSquare = (row + col) % 2 === 0;
+
+  // Adjusted square colors for better contrast
+  const squareColor = isLightSquare ? 'bg-gray-400' : 'bg-gray-700';
+
+  const selectedStyle = isSelected ? 'border-4 border-yellow-400' : '';
 
   return (
     <div
-      className={`${baseColor} ${selectedStyle} ${hoverStyle} aspect-square flex items-center justify-center`}
+      className={`flex items-center justify-center w-full h-full cursor-pointer ${squareColor} ${selectedStyle}`}
       onClick={onClick}
     >
-      <Piece piece={piece} />
+      {piece !== ' ' && <Piece piece={piece} />}
     </div>
   );
 }

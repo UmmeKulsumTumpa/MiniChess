@@ -9,3 +9,21 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* src/index.css */
+
+/* Glitter animation */
+@keyframes glitter {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+}
+
+.piece-container {
+  animation: glitter 2s infinite;
+}
